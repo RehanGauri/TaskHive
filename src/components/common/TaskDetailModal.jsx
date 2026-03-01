@@ -1,34 +1,31 @@
 import { X, Edit2, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { setSelectedTask, updateTask, deleteTask, updateTaskStatus } from '../../store/slices/taskSlice';
 
-export function TaskDetailModal({ task }) {
-  const dispatch = useDispatch();
+export function TaskDetailModal({ task, onClose, onSave, onDelete, getAssigneeName }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState(task);
 
   if (!task) return null;
 
   const handleClose = () => {
-    dispatch(setSelectedTask(null));
     setIsEditing(false);
+    onClose && onClose();
   };
 
   const handleStatusChange = (newStatus) => {
     const updated = { ...editData, status: newStatus };
     setEditData(updated);
-    dispatch(updateTaskStatus({ id: task.id, status: newStatus }));
+    if (onSave) onSave(updated);
   };
 
   const handleSaveEdit = () => {
-    dispatch(updateTask(editData));
+    onSave && onSave(editData);
     setIsEditing(false);
   };
 
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this task?')) {
-      dispatch(deleteTask(task.id));
+      onDelete && onDelete(task.id);
       handleClose();
     }
   };
@@ -70,7 +67,9 @@ export function TaskDetailModal({ task }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Assignee</p>
-              <p className="font-medium text-gray-900 dark:text-white mt-1">{editData.assignee}</p>
+              <p className="font-medium text-gray-900 dark:text-white mt-1">
+                {editData.assigneeName || (getAssigneeName ? getAssigneeName(editData.assignedTo) : '')}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">Due Date</p>

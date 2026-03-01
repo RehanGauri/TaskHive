@@ -1,16 +1,13 @@
 import { X } from 'lucide-react';
 import { useState } from 'react';
 
-const teamMembers = [
-  'Sarah Johnson',
-  'Mike Chen',
-  'Emma Wilson',
-  'David Lee',
-  'Alex Turner',
-  'Lisa Brown',
-];
-
-export function CreateTaskModal({ isOpen, onClose, onCreateTask }) {
+export function CreateTaskModal({
+  isOpen,
+  onClose,
+  onCreateTask,
+  showAssignee = false,
+  users = [],
+}) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assignee, setAssignee] = useState('');
@@ -21,18 +18,19 @@ export function CreateTaskModal({ isOpen, onClose, onCreateTask }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title || !assignee || !dueDate) {
+    if (!title || (showAssignee && !assignee)) {
       alert('Please fill all required fields');
       return;
     }
-    onCreateTask({
+    const payload = {
       title,
       description,
-      assignee,
       dueDate,
       priority,
       status,
-    });
+    };
+    if (showAssignee) payload.assignedTo = assignee;
+    onCreateTask(payload);
     // Reset form
     setTitle('');
     setDescription('');
@@ -56,7 +54,7 @@ export function CreateTaskModal({ isOpen, onClose, onCreateTask }) {
       {/* Modal */}
       <div className="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 ">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Create New Task</h2>
           <button
             onClick={onClose}
@@ -98,54 +96,58 @@ export function CreateTaskModal({ isOpen, onClose, onCreateTask }) {
           </div>
 
           {/* Assignee Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Assign To *
-            </label>
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex items-center justify-between"
-              >
-                <span className={assignee ? 'text-gray-900 dark:text-white' : 'text-gray-500'}>
-                  {assignee || 'Select team member...'}
-                </span>
-                <svg
-                  className={`w-5 h-5 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+          {showAssignee && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Assign To *
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent flex items-center justify-between"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-              </button>
+                  <span className={assignee ? 'text-gray-900 dark:text-white' : 'text-gray-500'}>
+                    {assignee
+                      ? users.find((u) => u.id === assignee)?.name
+                      : 'Select user...'}
+                  </span>
+                  <svg
+                    className={`w-5 h-5 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  </svg>
+                </button>
 
-              {/* Dropdown List */}
-              {showDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
-                  {teamMembers.map((member) => (
-                    <button
-                      key={member}
-                      type="button"
-                      onClick={() => {
-                        setAssignee(member);
-                        setShowDropdown(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
-                          {member.split(' ').map(n => n[0]).join('')}
+                {/* Dropdown List */}
+                {showDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
+                    {users.map((member) => (
+                      <button
+                        key={member.id}
+                        type="button"
+                        onClick={() => {
+                          setAssignee(member.id);
+                          setShowDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                            {member.name.split(' ').map((n) => n[0]).join('')}
+                          </div>
+                          <span>{member.name}</span>
                         </div>
-                        <span>{member}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Due Date */}
           <div>

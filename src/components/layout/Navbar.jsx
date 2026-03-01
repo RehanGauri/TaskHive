@@ -2,16 +2,25 @@ import { Search, Bell, Moon, Sun, ChevronDown, CheckSquare } from 'lucide-react'
 import { useState } from 'react';
 import { useTheme } from 'next-themes';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 export function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
+  const { logout, currentUser } = useAuth();
+  const displayName = currentUser?.name || 'User';
+  const initials = currentUser
+    ? currentUser.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : '';
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
@@ -60,7 +69,7 @@ export function Navbar() {
               className="flex items-center gap-2 pl-2 pr-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             >
               <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                JD
+                {initials || '?'}
               </div>
               <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400" />
             </button>
@@ -73,8 +82,9 @@ export function Navbar() {
                 ></div>
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20">
                   <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{user?.name || 'User'}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || 'user@example.com'}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {displayName}
+                    </p>
                   </div>
                   <div className="py-2">
                     <button className="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">

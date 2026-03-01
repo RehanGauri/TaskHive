@@ -1,14 +1,16 @@
-import { LayoutDashboard, CheckSquare, BarChart3, Users, Settings } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, BarChart3, Users, Settings, Video } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
-export function MobileNav() {
-  const navItems = [
+export function MobileNav({ navItems: customNav }) {
+  const defaultNav = [
     { id: 'dashboard', icon: LayoutDashboard, path: '/' },
     { id: 'tasks', icon: CheckSquare, path: '/tasks' },
     { id: 'analytics', icon: BarChart3, path: '/analytics' },
     { id: 'team', icon: Users, path: '/team' },
+    { id: 'meetings', icon: Video, path: '/meetings' },
     { id: 'settings', icon: Settings, path: '/settings' },
   ];
+  const navItems = customNav || defaultNav;
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-50">

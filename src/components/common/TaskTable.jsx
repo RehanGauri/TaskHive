@@ -1,20 +1,22 @@
 import { MoreVertical, Calendar, Eye, Edit2, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { setSelectedTask, deleteTask } from '../../store/slices/taskSlice';
 
-export function TaskTable({ tasks }) {
-  const dispatch = useDispatch();
+export function TaskTable({
+  tasks,
+  onTaskClick = () => {},
+  onDelete = () => {},
+  getAssigneeName,
+}) {
   const [openMenuId, setOpenMenuId] = useState(null);
 
   const handleTaskClick = (task) => {
-    dispatch(setSelectedTask(task));
+    onTaskClick(task);
   };
 
   const handleDelete = (id, e) => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this task?')) {
-      dispatch(deleteTask(id));
+      onDelete(id);
       setOpenMenuId(null);
     }
   };
@@ -95,9 +97,18 @@ export function TaskTable({ tasks }) {
                 <td className="px-4 sm:px-6 py-4 hidden md:table-cell">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
-                      {task.assignee.split(' ').map(n => n[0]).join('')}
+                      {(
+                        task.assigneeName ||
+                        (getAssigneeName ? getAssigneeName(task.assignedTo) : '')
+                      )
+                        .split(' ')
+                        .map((n) => n[0])
+                        .join('')}
                     </div>
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{task.assignee}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {task.assigneeName ||
+                        (getAssigneeName ? getAssigneeName(task.assignedTo) : '')}
+                    </span>
                   </div>
                 </td>
                 <td className="px-4 sm:px-6 py-4 hidden lg:table-cell">
