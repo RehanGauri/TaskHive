@@ -16,11 +16,12 @@ export default function AssignedTasks() {
 
   const handleCreate = (data) => {
     const newTask = {
-      ...data,
-      id: String(Date.now()),
+      title: data.title,
+      description: data.description,
       type: 'assigned',
-      createdBy: currentUser.id,
       assignedTo: data.assignedTo,
+      priority: data.priority,
+      status: data.status,
       createdAt: new Date().toISOString(),
     };
     addTask(newTask);

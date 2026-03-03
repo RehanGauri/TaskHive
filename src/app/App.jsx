@@ -37,6 +37,8 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            {/* legacy alias for generic dashboard path */}
+            <Route path="/dashboard" element={<FallbackRedirect />} />
 
             {/* admin routes */}
             <Route element={<ProtectedRoute role="admin" />}> 

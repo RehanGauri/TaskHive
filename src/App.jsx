@@ -16,7 +16,8 @@ import PrivateRoute from './routes/PrivateRoute';
 import AdminRoute from './routes/AdminRoute';
 
 function App() {
-  const { role } = useAuth(); 
+  const { currentUser } = useAuth();
+  const role = currentUser?.role;
 
   return (
     <ThemeProvider attribute="class" defaultTheme="light">

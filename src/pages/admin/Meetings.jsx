@@ -13,13 +13,12 @@ export default function Meetings() {
   const handleCreate = async ({ title, participantIds }) => {
     setCreating(true);
     const newMeet = {
-      id: `m${Date.now()}`,
       title,
       participants: participantIds,
-      created_at: new Date().toISOString(),
       meet_link: '#',
+      createdAt: new Date().toISOString(),
     };
-    addMeeting(newMeet);
+    await addMeeting(newMeet);
     setCreating(false);
     setIsModalOpen(false);
   };

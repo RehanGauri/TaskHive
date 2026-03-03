@@ -1,75 +1,13 @@
 import { Mail, Phone, MoreVertical, UserPlus, Crown, Shield, User as UserIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 
-const teamMembers = [
-  {
-    id: '1',
-    name: 'Sarah Johnson',
-    email: 'sarah.j@company.com',
-    role: 'admin',
-    avatar: 'SJ',
-    status: 'active',
-    tasksCompleted: 124,
-    tasksInProgress: 5,
-    joinedDate: 'Jan 2024',
-  },
-  {
-    id: '2',
-    name: 'Mike Chen',
-    email: 'mike.c@company.com',
-    role: 'manager',
-    avatar: 'MC',
-    status: 'active',
-    tasksCompleted: 98,
-    tasksInProgress: 3,
-    joinedDate: 'Feb 2024',
-  },
-  {
-    id: '3',
-    name: 'Emma Wilson',
-    email: 'emma.w@company.com',
-    role: 'member',
-    avatar: 'EW',
-    status: 'away',
-    tasksCompleted: 87,
-    tasksInProgress: 7,
-    joinedDate: 'Mar 2024',
-  },
-  {
-    id: '4',
-    name: 'David Lee',
-    email: 'david.l@company.com',
-    role: 'member',
-    avatar: 'DL',
-    status: 'active',
-    tasksCompleted: 102,
-    tasksInProgress: 4,
-    joinedDate: 'Jan 2024',
-  },
-  {
-    id: '5',
-    name: 'Alex Turner',
-    email: 'alex.t@company.com',
-    role: 'member',
-    avatar: 'AT',
-    status: 'offline',
-    tasksCompleted: 76,
-    tasksInProgress: 2,
-    joinedDate: 'Apr 2024',
-  },
-  {
-    id: '6',
-    name: 'Lisa Brown',
-    email: 'lisa.b@company.com',
-    role: 'manager',
-    avatar: 'LB',
-    status: 'active',
-    tasksCompleted: 91,
-    tasksInProgress: 6,
-    joinedDate: 'Feb 2024',
-  },
-];
+// will build teamMembers from database
 
 export function Team() {
+  const { currentUser } = useAuth();
+
   const getRoleIcon = (role) => {
     switch (role) {
       case 'admin':
@@ -101,6 +39,65 @@ export function Team() {
       default:
         return 'bg-gray-400';
     }
+  };
+
+  const [teamMembers, setTeamMembers] = useState([]);
+
+  useEffect(() => {
+    if (currentUser?.company_id) {
+      loadTeam();
+    }
+  }, [currentUser]);
+
+  const loadTeam = async () => {
+    // fetch users for company
+    const { data: users, error: uErr } = await supabase
+      .from('users')
+      .select('id, full_name as name, email, role, created_at')
+      .eq('company_id', currentUser.company_id);
+    if (uErr) {
+      console.error('fetch team users', uErr);
+      return;
+    }
+
+    // for each user compute task stats
+    const members = await Promise.all(
+      users.map(async (u) => {
+        const { data: completed } = await supabase
+          .from('tasks')
+          .select('id', { count: 'exact' })
+          .eq('company_id', currentUser.company_id)
+          .eq('assigned_to', u.id)
+          .eq('status', 'completed');
+        const { data: inProgress } = await supabase
+          .from('tasks')
+          .select('id', { count: 'exact' })
+          .eq('company_id', currentUser.company_id)
+          .eq('assigned_to', u.id)
+          .neq('status', 'completed');
+
+        return {
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          avatar: u.name
+            .split(' ')
+            .map((n) => n[0])
+            .join('')
+            .toUpperCase(),
+          status: 'active', // placeholder, could be added to users table later
+          tasksCompleted: completed?.length || 0,
+          tasksInProgress: inProgress?.length || 0,
+          joinedDate: new Date(u.created_at).toLocaleDateString('en-US', {
+            month: 'short',
+            year: 'numeric',
+          }),
+        };
+      })
+    );
+
+    setTeamMembers(members);
   };
 
   return (
