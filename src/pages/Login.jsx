@@ -11,7 +11,7 @@ import { useAuth } from '../context/AuthContext';
 
 export function Login() {
   const navigate = useNavigate();
-  const { login, currentUser } = useAuth();
+  const { login, currentUser, loading: authLoading } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,30 +20,38 @@ export function Login() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // ✅ Redirect if already logged in
+  useEffect(() => {
+    if (!authLoading && currentUser) {
+      navigate(
+        currentUser.role === 'admin' ? '/admin-dashboard' : '/user-dashboard',
+        { replace: true }
+      );
+    }
+  }, [currentUser, authLoading]);
+
+  // ✅ Show spinner while auth is loading — prevents flash of login page
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
       await login({ email, password });
-      // navigation will happen in effect when currentUser updates
+      // navigation handled by useEffect above
     } catch (err) {
-      console.error(err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (currentUser) {
-      if (currentUser.role === 'admin') {
-        navigate('/admin-dashboard');
-      } else {
-        navigate('/user-dashboard');
-      }
-    }
-  }, [currentUser, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-blue-950 flex items-center justify-center p-4">
@@ -60,7 +68,11 @@ export function Login() {
         </div>
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 p-8">
-          {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg px-4 py-2 mb-4">
+              {error}
+            </p>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

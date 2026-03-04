@@ -9,36 +9,34 @@ export const TaskProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
   const [meetings, setMeetings] = useState([]);
 
-  // fetch tasks whenever currentUser changes
+  // only reload when the user ID changes (not every render)
   useEffect(() => {
-    if (currentUser?.company_id) {
+    if (currentUser?.id) {
       loadTasks();
       loadMeetings();
     } else {
       setTasks([]);
       setMeetings([]);
     }
-  }, [currentUser]);
+  }, [currentUser?.id]);
 
   const loadTasks = async () => {
-    let query = supabase.from('tasks').select('*').eq('company_id', currentUser.company_id);
-    if (currentUser.role === 'user') {
-      query = query.eq('assigned_to', currentUser.id);
-    }
-    const { data, error } = await query;
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('company_id', currentUser.company_id);
     if (error) {
       console.error('loadTasks error', error);
-    } else {
-      // convert snake_case from supabase to camelCase for our UI
-      setTasks(
-        data.map((t) => ({
-          ...t,
-          assignedTo: t.assigned_to,
-          createdBy: t.created_by,
-          createdAt: t.created_at,
-        }))
-      );
+      return;
     }
+    setTasks(
+      data.map((t) => ({
+        ...t,
+        assignedTo: t.assigned_to,
+        createdBy: t.created_by,
+        createdAt: t.created_at,
+      }))
+    );
   };
 
   const loadMeetings = async () => {
@@ -48,18 +46,17 @@ export const TaskProvider = ({ children }) => {
       .eq('company_id', currentUser.company_id);
     if (error) {
       console.error('loadMeetings error', error);
-    } else {
-      setMeetings(
-        data.map((m) => ({
-          ...m,
-          createdAt: m.created_at,
-        }))
-      );
+      return;
     }
+    setMeetings(
+      data.map((m) => ({
+        ...m,
+        createdAt: m.created_at,
+      }))
+    );
   };
 
   const addTask = async (task) => {
-    // convert camelCase keys to snake_case for database
     const row = {
       company_id: currentUser.company_id,
       created_by: currentUser.id,
@@ -69,12 +66,10 @@ export const TaskProvider = ({ children }) => {
       description: task.description,
       priority: task.priority,
       status: task.status,
-      created_at: task.createdAt,
     };
-    const { data, error } = await supabase.from('tasks').insert(row);
-    if (error) return console.error(error);
+    const { error } = await supabase.from('tasks').insert(row);
+    if (error) { console.error(error); return; }
     loadTasks();
-    return data;
   };
 
   const updateTask = async (updated) => {
@@ -85,16 +80,14 @@ export const TaskProvider = ({ children }) => {
       description: updated.description,
       priority: updated.priority,
       status: updated.status,
-      // created_at shouldn't change
     };
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('tasks')
       .update(row)
       .eq('id', updated.id)
       .eq('company_id', currentUser.company_id);
-    if (error) return console.error(error);
+    if (error) { console.error(error); return; }
     loadTasks();
-    return data;
   };
 
   const deleteTask = async (id) => {
@@ -103,21 +96,21 @@ export const TaskProvider = ({ children }) => {
       .delete()
       .eq('id', id)
       .eq('company_id', currentUser.company_id);
-    if (error) return console.error(error);
+    if (error) { console.error(error); return; }
     loadTasks();
   };
 
   const addMeeting = async (meeting) => {
     const row = {
-      ...meeting,
+      title: meeting.title,
+      participants: meeting.participants,
+      meet_link: meeting.meet_link || '#',
       company_id: currentUser.company_id,
       created_by: currentUser.id,
-      created_at: meeting.createdAt,
     };
-    const { data, error } = await supabase.from('meetings').insert(row);
-    if (error) return console.error(error);
+    const { error } = await supabase.from('meetings').insert(row);
+    if (error) { console.error(error); return; }
     loadMeetings();
-    return data;
   };
 
   const deleteMeeting = async (id) => {
@@ -126,7 +119,7 @@ export const TaskProvider = ({ children }) => {
       .delete()
       .eq('id', id)
       .eq('company_id', currentUser.company_id);
-    if (error) return console.error(error);
+    if (error) { console.error(error); return; }
     loadMeetings();
   };
 

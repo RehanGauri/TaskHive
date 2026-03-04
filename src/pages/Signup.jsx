@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Mail,
@@ -12,7 +12,7 @@ import { useAuth } from '../context/AuthContext';
 
 export function Signup() {
   const navigate = useNavigate();
-  const { signupAdmin } = useAuth();
+  const { signupAdmin, currentUser, loading: authLoading } = useAuth();
 
   const [company, setCompany] = useState('');
   const [name, setName] = useState('');
@@ -23,6 +23,22 @@ export function Signup() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // ✅ Redirect if already logged in
+  useEffect(() => {
+    if (!authLoading && currentUser) {
+      navigate('/admin-dashboard', { replace: true });
+    }
+  }, [currentUser, authLoading]);
+
+  // ✅ Show spinner while auth is loading — prevents flash of signup page
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,9 +57,8 @@ export function Signup() {
         email,
         password,
       });
-      navigate('/admin-dashboard');
+      // navigation handled by useEffect above after currentUser is set
     } catch (err) {
-      console.error(err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -68,7 +83,11 @@ export function Signup() {
 
         {/* Card */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 p-8">
-          {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg px-4 py-2 mb-4">
+              {error}
+            </p>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -142,11 +161,7 @@ export function Signup() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -171,11 +186,7 @@ export function Signup() {
                   onClick={() => setShowConfirm(!showConfirm)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
-                  {showConfirm ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>

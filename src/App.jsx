@@ -1,71 +1,73 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider } from 'next-themes';
-import { useAuth } from './context/AuthContext';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
+import { ThemeProvider } from "next-themes";
+import { AuthProvider } from "./context/AuthContext";
+import { TaskProvider } from "./context/TaskContext";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import FallbackRedirect from "./routes/FallbackRedirect";
+import AdminLayout from "./layouts/AdminLayout";
+import UserLayout from "./layouts/UserLayout";
 
-import { MainLayout } from './components/layout/MainLayout';
-import { Dashboard } from './pages/Dashboard';
-import { Tasks } from './pages/Tasks';
-import { Analytics } from './pages/Analytics';
-import { Team } from './pages/Team';
-import { Settings } from './pages/Settings';
-import { MeetingsPage } from './pages/MeetingsPage';
-import { Login } from './pages/Login';
-import { Signup } from './pages/Signup';
+// admin pages
+import AdminDashboard from "./pages/admin/Dashboard";
+import AssignedTasks from "./pages/admin/AssignedTasks";
+import AdminMeetings from "./pages/admin/Meetings";
+import UsersPage from "./pages/admin/Users";
+import { Team } from "./pages/Team";
 
-import PrivateRoute from './routes/PrivateRoute';
-import AdminRoute from './routes/AdminRoute';
+// user pages
+import UserDashboard from "./pages/user/Dashboard";
+import MyTasks from "./pages/user/MyTasks";
+import UserMeetings from "./pages/user/Meetings";
+
+// common
+import { PersonalTasks } from "./pages/common/PersonalTasks";
+import { Login } from "./pages/Login";
+import { Signup } from "./pages/Signup";
 
 function App() {
-  const { currentUser } = useAuth();
-  const role = currentUser?.role;
-
   return (
-    <ThemeProvider attribute="class" defaultTheme="light">
-      <BrowserRouter>
-        <Routes>
+    <AuthProvider>
+      <TaskProvider>
+        <ThemeProvider attribute="class" defaultTheme="light">
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
 
-            {/* Public Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+              {/* Admin routes */}
+              <Route element={<ProtectedRoute role="admin" />}>
+                <Route path="/admin-dashboard" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="assigned" element={<AssignedTasks />} />
+                  <Route path="personal" element={<PersonalTasks />} />
+                  <Route path="meetings" element={<AdminMeetings />} />
+                  <Route path="users" element={<UsersPage />} />
+                </Route>
+                <Route path="/team" element={<AdminLayout />}>
+                  <Route index element={<Team />} />
+                </Route>
+              </Route>
 
-            {/* Protected Routes */}
-            <Route
-              path="/"
-              element={
-                <PrivateRoute>
-                  <MainLayout />
-                </PrivateRoute>
-              }
-            >
-              <Route index element={<Navigate to={role === 'admin' ? '/admin-dashboard' : '/dashboard'} replace />} />
+              {/* User routes */}
+              <Route element={<ProtectedRoute role="user" />}>
+                <Route path="/user-dashboard" element={<UserLayout />}>
+                  <Route index element={<UserDashboard />} />
+                  <Route path="tasks" element={<MyTasks />} />
+                  <Route path="personal" element={<PersonalTasks />} />
+                  <Route path="meetings" element={<UserMeetings />} />
+                </Route>
+              </Route>
 
-            <Route path="dashboard" element={<Dashboard />} />
-
-            <Route
-              path="admin-dashboard"
-              element={
-                <AdminRoute>
-                  <Dashboard />
-                </AdminRoute>
-              }
-            />
-
-              <Route path="tasks" element={<Tasks />} />
-              <Route path="analytics" element={<Analytics />} />
-              <Route path="team" element={<Team />} />
-              <Route path="meetings" element={<MeetingsPage />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-
-            {/* Catch All */}
-            <Route
-              path="*"
-              element={<Navigate to={role === 'admin' ? '/admin-dashboard' : '/dashboard'} replace />}
-            />
-
-          </Routes>
-        </BrowserRouter>
-      </ThemeProvider>
+              <Route path="*" element={<FallbackRedirect />} />
+            </Routes>
+          </BrowserRouter>
+        </ThemeProvider>
+      </TaskProvider>
+    </AuthProvider>
   );
 }
 
