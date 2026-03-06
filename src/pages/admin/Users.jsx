@@ -10,7 +10,7 @@ export default function Users() {
   useEffect(() => {
     if (currentUser?.company_id) fetchUsers();
   }, [currentUser]);
-
+ 
   const fetchUsers = async () => {
     setLoading(true);
     const { data, error } = await supabase

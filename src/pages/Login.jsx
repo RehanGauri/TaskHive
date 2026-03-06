@@ -131,6 +131,13 @@ export function Login() {
                   Remember me
                 </span>
               </label>
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                Forgot password?
+              </button>
             </div>
 
             <button

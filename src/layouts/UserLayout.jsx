@@ -2,14 +2,15 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from '../components/layout/Sidebar';
 import { Navbar } from '../components/layout/Navbar';
 import { MobileNav } from '../components/layout/MobileNav';
-import { CheckSquare, Video } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, Video, Settings } from 'lucide-react';
 
 export default function UserLayout() {
   const navItems = [
-    { id: 'uesrDashboard', label: 'My Dashboard', icon: CheckSquare, path: '/user-dashboard/dashboard' },
+    { id: 'userDashboard', label: 'My Dashboard', icon: LayoutDashboard, path: '/user-dashboard', end: true },
     { id: 'mytasks', label: 'My Assigned Tasks', icon: CheckSquare, path: '/user-dashboard/tasks' },
     { id: 'personal', label: 'Personal Tasks', icon: CheckSquare, path: '/user-dashboard/personal' },
     { id: 'meetings', label: 'Meetings', icon: Video, path: '/user-dashboard/meetings' },
+    { id: 'settings', label: 'Settings', icon: Settings, path: '/user-dashboard/settings' },
   ];
 
   return (

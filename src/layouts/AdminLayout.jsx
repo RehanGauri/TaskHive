@@ -2,21 +2,23 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from '../components/layout/Sidebar';
 import { Navbar } from '../components/layout/Navbar';
 import { MobileNav } from '../components/layout/MobileNav';
-import { LayoutDashboard, CheckSquare, Video, Users } from 'lucide-react';
+import { TrialBanner } from '../components/TrialBanner';
+import { LayoutDashboard, CheckSquare, Video, Users, Settings } from 'lucide-react';
 
 export default function AdminLayout() {
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin-dashboard' },
-    { id: 'assigned', label: 'All Assigned Tasks', icon: CheckSquare, path: '/admin-dashboard/assigned' },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin-dashboard', end: true },
+    { id: 'assigned', label: 'Assigned Tasks', icon: CheckSquare, path: '/admin-dashboard/assigned' },
     { id: 'personal', label: 'Personal Tasks', icon: CheckSquare, path: '/admin-dashboard/personal' },
     { id: 'meetings', label: 'Meetings', icon: Video, path: '/admin-dashboard/meetings' },
     { id: 'users', label: 'Users', icon: Users, path: '/admin-dashboard/users' },
-    // team page is admin-only and lives outside the dashboard prefix
     { id: 'team', label: 'Team', icon: Users, path: '/team' },
+    { id: 'settings', label: 'Settings', icon: Settings, path: '/admin-dashboard/settings' },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* <TrialBanner /> */}
       <MobileNav navItems={navItems} />
       <div className="hidden lg:block">
         <Sidebar navItems={navItems} />
