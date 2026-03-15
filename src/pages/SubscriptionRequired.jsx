@@ -31,7 +31,7 @@ export default function SubscriptionRequired() {
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           {subscription?.subscription_status === 'trial'
-            ? 'Your 7-day free trial has ended. Subscribe to continue using TaskHive.'
+            ? 'Your trial has ended. Subscribe to continue using TaskHive.'
             : 'Your subscription has expired. Please renew to continue.'}
         </p>
 

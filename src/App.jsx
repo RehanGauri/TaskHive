@@ -17,6 +17,7 @@ import AssignedTasks from "./pages/admin/AssignedTasks";
 import AdminMeetings from "./pages/admin/Adminmeetings";
 import UsersPage from "./pages/admin/Users";
 import { Team } from "./pages/Team";
+import { Analytics } from './pages/admin/Analytics';
 
 // user pages
 import UserDashboard from "./pages/user/Dashboard";
@@ -73,6 +74,7 @@ function App() {
                       <Route path="meetings" element={<AdminMeetings />} />
                       <Route path="users" element={<UsersPage />} />
                       <Route path="settings" element={<Settings />} />
+                      <Route path="analytics" element={<Analytics />} />
                     </Route>
                     <Route path="/team" element={<AdminLayout />}>
                       <Route index element={<Team />} />

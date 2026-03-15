@@ -22,7 +22,7 @@ export const SubscriptionProvider = ({ children }) => {
     setLoading(true);
     const { data, error } = await supabase
       .from('companies')
-      .select('subscription_status, trial_start_date, trial_end_date, plan_type, razorpay_customer_id, razorpay_subscription_id')
+      .select('subscription_status, trial_start_date, trial_end_date, plan_type, razorpay_subscription_id')
       .eq('id', currentUser.company_id)
       .maybeSingle();
     if (error) { console.error('fetchSubscription error', error); setLoading(false); return; }
@@ -48,16 +48,19 @@ export const SubscriptionProvider = ({ children }) => {
     return false;
   };
 
-  const trialDaysLeft = () => {
+  // Returns ms remaining
+  const trialMsLeft = () => {
     if (!subscription?.trial_end_date) return 0;
-    const diff = new Date(subscription.trial_end_date) - new Date();
-    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    return Math.max(0, new Date(subscription.trial_end_date) - new Date());
   };
+
+  const trialDaysLeft = () => Math.ceil(trialMsLeft() / (1000 * 60 * 60 * 24));
 
   return (
     <SubscriptionContext.Provider value={{
       subscription, loading,
-      isAccessAllowed, isTrialExpired, trialDaysLeft,
+      isAccessAllowed, isTrialExpired,
+      trialDaysLeft, trialMsLeft,
       fetchSubscription,
     }}>
       {children}
