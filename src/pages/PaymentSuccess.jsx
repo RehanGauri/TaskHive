@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle, CheckSquare } from 'lucide-react';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useAuth } from '../context/AuthContext';
+import logo from "../assets/images/logo.png"
 
 export default function PaymentSuccess() {
   const navigate = useNavigate();
@@ -28,8 +29,11 @@ export default function PaymentSuccess() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center p-4">
       <div className="flex items-center gap-2 mb-8">
-        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-          <CheckSquare className="w-6 h-6 text-white" />
+        {/* <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center"> */}
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+
+          {/* <CheckSquare className="w-6 h-6 text-white" /> */}
+          <img src={logo} alt="TaskHive" className="w-14 h-14 object-contain" />
         </div>
         <span className="text-xl font-bold text-gray-900 dark:text-white">TaskHive</span>
       </div>

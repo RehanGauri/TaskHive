@@ -7,6 +7,8 @@ import { useTasks } from '../../context/TaskContext';
 import { useSubscription } from '../../context/SubscriptionContext';
 import { supabase } from '../../lib/supabaseClient';
 
+import logo from "../../assets/images/logo.png"
+
 export function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -95,8 +97,10 @@ export function Navbar() {
             </div>
             {/* Mobile: logo + company name */}
             <div className="flex items-center gap-2 sm:hidden pl-12">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <CheckSquare className="w-5 h-5 text-white" />
+              {/* <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center"> */}
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                {/* <CheckSquare className="w-5 h-5 text-white" /> */}
+                <img src={logo} alt="TaskHive" className="w-8 h-8 object-contain" />
               </div>
               <div>
                 <span className="font-semibold text-gray-900 dark:text-white text-sm">TaskHive</span>

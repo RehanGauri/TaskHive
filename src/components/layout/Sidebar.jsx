@@ -1,6 +1,7 @@
 import { LayoutDashboard, CheckSquare, BarChart3, Users, Settings, Video } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import logo from "../../assets/images/logo.png"
 
 export function Sidebar({ navItems: customNav }) {
   const { currentUser } = useAuth();
@@ -35,8 +36,10 @@ export function Sidebar({ navItems: customNav }) {
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <CheckSquare className="w-5 h-5 text-white" />
+          {/* <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center"> */}
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+            {/* <CheckSquare className="w-5 h-5 text-white" /> */}
+            <img src={logo} alt="TaskHive" className="w-8 h-8 object-contain" />
           </div>
           <span className="font-semibold text-gray-900 dark:text-white">TaskHive</span>
         </div>

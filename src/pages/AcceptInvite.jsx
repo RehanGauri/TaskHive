@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { Lock, CheckSquare } from 'lucide-react';
+import logo from "../assets/images/logo.png"
 
 export default function AcceptInvite() {
   const navigate = useNavigate();
@@ -82,9 +83,11 @@ export default function AcceptInvite() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-blue-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
-            <CheckSquare className="w-8 h-8 text-white" />
-          </div>
+          {/* <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg"> */}
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg">
+          {/* <CheckSquare className="w-6 h-6 text-white" /> */}
+          <img src={logo} alt="TaskHive" className="w-14 h-14 object-contain" />
+        </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Welcome to TaskHive
           </h1>

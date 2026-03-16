@@ -3,6 +3,7 @@ import { CheckSquare, Check, Zap, Shield, Building2, ArrowLeft, Clock } from 'lu
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSubscription } from '../context/SubscriptionContext';
+import logo from "../assets/images/logo.png"
 
 const PLANS = [
   {
@@ -155,9 +156,12 @@ export default function Pricing() {
 
       <div className="text-center mb-12">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-            <CheckSquare className="w-6 h-6 text-white" />
-          </div>
+          {/* <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center"> */}
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+
+          {/* <CheckSquare className="w-6 h-6 text-white" /> */}
+          <img src={logo} alt="TaskHive" className="w-14 h-14 object-contain" />
+        </div>
           <span className="text-xl font-bold text-gray-900 dark:text-white">TaskHive</span>
         </div>
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">Simple, Transparent Pricing</h1>

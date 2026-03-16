@@ -9,6 +9,7 @@ import {
   CheckSquare,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import logo from "../assets/images/logo.png"
 
 export function Signup() {
   const navigate = useNavigate();
@@ -70,9 +71,11 @@ export function Signup() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
-            <CheckSquare className="w-8 h-8 text-white" />
-          </div>
+          {/* <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg"> */}
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg">
+          {/* <CheckSquare className="w-6 h-6 text-white" /> */}
+          <img src={logo} alt="TaskHive" className="w-14 h-14 object-contain" />
+        </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Create account
           </h1>
