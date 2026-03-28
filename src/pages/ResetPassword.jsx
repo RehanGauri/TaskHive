@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, CheckSquare } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import logo from '../assets/images/logo.png'
 
 export default function ResetPassword() {
   const navigate = useNavigate();
