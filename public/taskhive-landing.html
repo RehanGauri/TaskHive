@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskHive — Manage Teams. Get Things Done.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #080808;
+  --surface: #111;
+  --surface2: #181818;
+  --accent: #f59e0b;
+  --accent2: #10b981;
+  --accent3: #ef4444;
+  --text: #f5f5f5;
+  --muted: #777;
+  --border: rgba(255,255,255,0.07);
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+#bgCanvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 60px;
+  background: rgba(8,8,8,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px; font-weight: 800;
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--accent), #f97316);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+}
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+.nav-links a:hover { color: var(--text); }
+.nav-cta { display: flex; gap: 10px; align-items: center; }
+.btn-ghost {
+  padding: 8px 18px; border: 1px solid var(--border); border-radius: 8px;
+  background: transparent; color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s;
+  text-decoration: none; display: inline-block;
+}
+.btn-ghost:hover { border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); }
+.btn-primary {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, var(--accent), #f97316);
+  border: none; border-radius: 8px; color: #000;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all 0.3s;
+  box-shadow: 0 0 20px rgba(245,158,11,0.3);
+  text-decoration: none; display: inline-block;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 30px rgba(245,158,11,0.5); }
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+.hamburger span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.3s; }
+
+.page { position: relative; z-index: 1; }
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 120px 20px 80px;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px;
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 100px; font-size: 13px; color: #fcd34d;
+  margin-bottom: 28px;
+  animation: fadeUp 0.8s ease both;
+}
+.bdot { width: 6px; height: 6px; background: var(--accent2); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
+
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(42px, 7vw, 88px);
+  font-weight: 800; line-height: 1.05;
+  letter-spacing: -2px;
+  max-width: 880px; margin: 0 auto 22px;
+  animation: fadeUp 0.8s 0.1s ease both;
+}
+.gt {
+  background: linear-gradient(135deg, #f59e0b 0%, #10b981 50%, #fcd34d 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--muted); font-weight: 300; line-height: 1.7;
+  max-width: 540px; margin: 0 auto 44px;
+  animation: fadeUp 0.8s 0.2s ease both;
+}
+.hero-btns {
+  display: flex; gap: 14px; justify-content: center;
+  flex-wrap: wrap; animation: fadeUp 0.8s 0.3s ease both;
+}
+.btn-hero {
+  padding: 15px 34px;
+  background: linear-gradient(135deg, var(--accent), #f97316);
+  border: none; border-radius: 12px; color: #000;
+  font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700;
+  cursor: pointer; transition: all 0.3s;
+  box-shadow: 0 0 40px rgba(245,158,11,0.4);
+  position: relative; overflow: hidden;
+  text-decoration: none; display: inline-block;
+}
+.btn-hero::before {
+  content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+.btn-hero:hover::before { left:100%; }
+.btn-hero:hover { transform: translateY(-2px); box-shadow: 0 8px 50px rgba(245,158,11,0.6); }
+.btn-ol {
+  padding: 15px 34px; background: transparent;
+  border: 1px solid rgba(255,255,255,0.14); border-radius: 12px;
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.3s;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-ol:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); }
+
+/* DASHBOARD PREVIEW */
+.hero-visual { margin-top: 72px; perspective: 1200px; animation: fadeUp 0.8s 0.4s ease both; }
+.dashboard-3d {
+  width: min(880px, 94vw); margin: 0 auto;
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 30px 80px rgba(0,0,0,0.8), 0 0 80px rgba(245,158,11,0.1);
+  animation: floatCard 6s ease-in-out infinite;
+}
+@keyframes floatCard {
+  0%,100% { transform: rotateX(14deg) rotateY(-3deg) translateY(0) scale(0.93); }
+  50% { transform: rotateX(11deg) rotateY(-2deg) translateY(-14px) scale(0.93); }
+}
+.dashboard-3d:hover { animation: none; transform: rotateX(4deg) rotateY(0deg) scale(0.96); transition: transform 0.6s ease; }
+.dh { background: #0d0d0d; padding: 12px 18px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid var(--border); }
+.dot { width: 11px; height: 11px; border-radius: 50%; }
+.dot.r{background:#ff5f57} .dot.y{background:#febc2e} .dot.g{background:#28c840}
+.dh-title { flex:1; text-align:center; font-size:12px; color:var(--muted); }
+.db { background:#0a0a0a; display:grid; grid-template-columns:200px 1fr; min-height:420px; }
+.dsb { background:#070707; border-right:1px solid var(--border); padding:16px 0; }
+.dsi { display:flex; align-items:center; gap:9px; padding:9px 18px; font-size:13px; color:var(--muted); }
+.dsi.active { color:var(--text); background:rgba(245,158,11,0.1); border-right:2px solid var(--accent); }
+.dm { padding:22px; overflow:hidden; }
+.dtb { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.dg { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; }
+.dadd { background:var(--accent); color:#000; border:none; border-radius:7px; padding:7px 14px; font-size:12px; font-weight:700; cursor:default; }
+.ds { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px; }
+.sc { background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:13px; }
+.sl { font-size:11px; color:var(--muted); margin-bottom:5px; }
+.sv { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; }
+.sv.b{color:var(--accent)} .sv.g2{color:var(--accent2)} .sv.r2{color:var(--accent3)}
+.pb { height:3px; background:var(--border); border-radius:10px; margin-top:5px; overflow:hidden; }
+.pf { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--accent),var(--accent2)); }
+.tl { display:flex; flex-direction:column; gap:7px; }
+.ti { background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:10px 14px; display:flex; align-items:center; gap:10px; font-size:12px; }
+.tc { width:16px; height:16px; border-radius:50%; border:2px solid; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:9px; }
+.tc.done{border-color:var(--accent2);background:rgba(16,185,129,0.12);color:var(--accent2)}
+.tc.pend{border-color:var(--muted)}
+.tc.urg{border-color:var(--accent3)}
+.tn{flex:1}
+.tn.done{text-decoration:line-through;color:var(--muted)}
+.ttag{font-size:10px;padding:3px 8px;border-radius:100px;font-weight:500}
+.td{background:rgba(245,158,11,0.12);color:#fcd34d}
+.tv{background:rgba(16,185,129,0.1);color:var(--accent2)}
+.tu{background:rgba(239,68,68,0.1);color:var(--accent3)}
+
+/* STATS */
+.stats-strip { display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--border); border-bottom:1px solid var(--border); position:relative; z-index:1; }
+.sb { padding:44px 30px; text-align:center; border-right:1px solid var(--border); background:var(--bg); }
+.sb:last-child { border-right:none; }
+.sn { font-family:'Syne',sans-serif; font-size:40px; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.sd { font-size:13px; color:var(--muted); margin-top:5px; }
+
+/* FEATURES */
+.features { padding:100px 60px; max-width:1200px; margin:0 auto; position:relative; z-index:1; }
+.section-label { font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:14px; }
+.section-title { font-family:'Syne',sans-serif; font-size:clamp(30px,4vw,50px); font-weight:800; letter-spacing:-1.5px; margin-bottom:14px; line-height:1.1; }
+.section-sub { color:var(--muted); font-size:17px; max-width:480px; line-height:1.7; margin-bottom:56px; }
+.fg { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+.fc { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px; transition:all 0.4s; position:relative; overflow:hidden; cursor:default; }
+.fc::after { content:''; position:absolute; top:0;left:0;right:0;bottom:0; background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(16,185,129,0.03)); opacity:0; transition:opacity 0.4s; }
+.fc:hover { transform:translateY(-6px); border-color:rgba(245,158,11,0.25); }
+.fc:hover::after { opacity:1; }
+.fi { width:48px;height:48px; background:rgba(245,158,11,0.1); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:18px; position:relative; z-index:1; }
+.ft { font-family:'Syne',sans-serif; font-size:17px; font-weight:700; margin-bottom:9px; position:relative; z-index:1; }
+.fd { color:var(--muted); font-size:14px; line-height:1.7; position:relative; z-index:1; }
+
+/* HOW IT WORKS */
+.how { padding:100px 60px; position:relative; z-index:1; }
+.how-inner { max-width:1100px; margin:0 auto; }
+.steps { display:grid; grid-template-columns:repeat(4,1fr); gap:28px; margin-top:56px; position:relative; }
+.steps::before { content:''; position:absolute; top:30px; left:calc(12.5% + 15px); right:calc(12.5% + 15px); height:1px; background:linear-gradient(90deg,transparent,var(--border),var(--border),var(--border),transparent); }
+.step { text-align:center; position:relative; z-index:1; }
+.snum { width:60px;height:60px; background:var(--surface2); border:1px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-size:18px; font-weight:800; margin:0 auto 18px; color:var(--accent); transition:all 0.3s; }
+.step:hover .snum { background:var(--accent); color:#000; box-shadow:0 0 30px rgba(245,158,11,0.5); }
+.stit { font-family:'Syne',sans-serif; font-weight:700; margin-bottom:9px; }
+.sdesc { font-size:13px; color:var(--muted); line-height:1.6; }
+
+/* PRICING */
+.pricing { padding:100px 60px; position:relative; z-index:1; }
+.pricing-inner { max-width:1100px; margin:0 auto; text-align:center; }
+.pg { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:56px; }
+.pc { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:34px; text-align:left; transition:transform 0.3s; position:relative; }
+.pc:hover { transform:translateY(-6px); }
+.pc.feat { border-color:rgba(245,158,11,0.4); background:linear-gradient(145deg,rgba(245,158,11,0.07),rgba(16,185,129,0.03)); box-shadow:0 0 60px rgba(245,158,11,0.1); }
+.fbadge { position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg,var(--accent),#f97316); color:#000; font-size:10px; font-weight:700; padding:4px 14px; border-radius:100px; white-space:nowrap; }
+.pname { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--muted); margin-bottom:10px; text-transform:uppercase; letter-spacing:1px; }
+.pprice { font-family:'Syne',sans-serif; font-size:42px; font-weight:800; line-height:1; margin-bottom:5px; }
+.pprice span { font-size:16px; font-weight:400; color:var(--muted); }
+.pdesc { font-size:13px; color:var(--muted); margin-bottom:8px; }
+.ptrial { font-size:12px; color:var(--accent2); margin-bottom:20px; font-weight:500; }
+.pf2 { list-style:none; margin-bottom:26px; display:flex; flex-direction:column; gap:9px; }
+.pf2 li { font-size:13px; display:flex; align-items:center; gap:7px; color:#ccc; }
+.pf2 li::before { content:'✓'; color:var(--accent2); font-weight:700; flex-shrink:0; }
+.bplan { width:100%; padding:12px; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.3s; border:none; text-decoration:none; display:block; text-align:center; }
+.bplan-ol { background:transparent; border:1px solid var(--border); color:var(--text); }
+.bplan-ol:hover { border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.08); }
+.bplan-f { background:linear-gradient(135deg,var(--accent),#f97316); color:#000; font-weight:700; box-shadow:0 0 24px rgba(245,158,11,0.28); }
+.bplan-f:hover { box-shadow:0 0 36px rgba(245,158,11,0.5); transform:translateY(-1px); }
+
+/* CTA */
+.cta-section { padding:100px 60px; text-align:center; position:relative; z-index:1; }
+.cta-box { max-width:680px; margin:0 auto; background:var(--surface); border:1px solid rgba(245,158,11,0.18); border-radius:24px; padding:76px 56px; position:relative; overflow:hidden; }
+.cta-box::before { content:''; position:absolute; top:-50%; left:50%; transform:translateX(-50%); width:400px; height:400px; background:radial-gradient(circle,rgba(245,158,11,0.1) 0%,transparent 70%); }
+.cta-box h2 { font-family:'Syne',sans-serif; font-size:clamp(26px,4vw,42px); font-weight:800; margin-bottom:14px; position:relative; }
+.cta-box p { color:var(--muted); font-size:16px; margin-bottom:34px; position:relative; }
+.cta-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; position:relative; }
+
+/* FOOTER */
+footer { border-top:1px solid var(--border); padding:46px 60px; display:flex; align-items:center; justify-content:space-between; position:relative; z-index:1; flex-wrap:wrap; gap:18px; }
+.fl { font-family:'Syne',sans-serif; font-weight:800; font-size:18px; display:flex; align-items:center; gap:8px; }
+.flinks { display:flex; gap:26px; list-style:none; }
+.flinks a { color:var(--muted); font-size:13px; text-decoration:none; transition:color 0.2s; }
+.flinks a:hover { color:var(--text); }
+.fc2 { font-size:13px; color:var(--muted); }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+.reveal { opacity:0; transform:translateY(30px); transition:opacity 0.7s ease,transform 0.7s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+/* RESPONSIVE */
+@media(max-width:900px) {
+  nav { padding:15px 22px; }
+  .nav-links { display:none; }
+  .hamburger { display:flex; }
+  .fg { grid-template-columns:1fr 1fr; }
+  .pg { grid-template-columns:1fr; max-width:380px; margin:56px auto 0; }
+  .stats-strip { grid-template-columns:repeat(2,1fr); }
+  .features,.how,.pricing,.cta-section { padding:70px 22px; }
+  .steps { grid-template-columns:repeat(2,1fr); }
+  .steps::before { display:none; }
+  footer { padding:36px 22px; flex-direction:column; text-align:center; }
+  .flinks { justify-content:center; }
+  .db { grid-template-columns:1fr; }
+  .dsb { display:none; }
+  .cta-box { padding:50px 26px; }
+}
+@media(max-width:600px) {
+  .fg { grid-template-columns:1fr; }
+  .steps { grid-template-columns:1fr; }
+  .stats-strip { grid-template-columns:1fr 1fr; }
+  h1 { letter-spacing:-1px; }
+  .hero-btns { flex-direction:column; align-items:center; }
+  .btn-hero,.btn-ol { width:100%; max-width:280px; justify-content:center; }
+  .nav-cta .btn-ghost { display:none; }
+}
+
+/* MOBILE MENU */
+.mob-menu { position:fixed; top:68px; left:0; right:0; background:rgba(8,8,8,0.98); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:18px 22px; z-index:99; transform:translateY(-110%); opacity:0; transition:all 0.3s; }
+.mob-menu.open { transform:translateY(0); opacity:1; }
+.mob-menu ul { list-style:none; display:flex; flex-direction:column; gap:2px; }
+.mob-menu a { display:block; padding:12px 0; color:var(--muted); text-decoration:none; font-size:16px; border-bottom:1px solid var(--border); transition:color 0.2s; }
+.mob-menu a:hover { color:var(--text); }
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="logo"><div class="logo-icon">🐝</div>TaskHive</div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="https://realtask-hive.vercel.app/login" class="btn-ghost">Sign In</a>
+    <a href="https://realtask-hive.vercel.app/signup" class="btn-primary">Get Started Free</a>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</nav>
+
+<div class="mob-menu" id="mobMenu">
+  <ul>
+    <li><a href="#features" onclick="toggleMenu()">Features</a></li>
+    <li><a href="#how" onclick="toggleMenu()">How It Works</a></li>
+    <li><a href="#pricing" onclick="toggleMenu()">Pricing</a></li>
+    <li><a href="https://realtask-hive.vercel.app/login" onclick="toggleMenu()">Sign In</a></li>
+    <li><a href="https://realtask-hive.vercel.app/signup" onclick="toggleMenu()" style="color:var(--accent)">Get Started Free →</a></li>
+  </ul>
+</div>
+
+<!-- HERO -->
+<section class="hero page">
+  <div>
+    <div class="hero-badge"><span class="bdot"></span>15-day free trial — no credit card needed</div>
+    <h1>Your Team.<br><span class="gt">One Hive.</span></h1>
+    <p class="hero-sub">TaskHive keeps your team aligned, tasks on track, and meetings productive. Invite your team, assign work, and get things done — beautifully.</p>
+    <div class="hero-btns">
+      <a href="https://realtask-hive.vercel.app/signup" class="btn-hero">Start Free Trial →</a>
+      <button class="btn-ol" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})"><span>▶</span> See How It Works</button>
+    </div>
+
+    <div class="hero-visual">
+      <div class="dashboard-3d">
+        <div class="dh">
+          <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+          <div class="dh-title">TaskHive — Admin Dashboard</div>
+        </div>
+        <div class="db">
+          <div class="dsb">
+            <div class="dsi active">📋&nbsp; Dashboard</div>
+            <div class="dsi">✅&nbsp; Assigned Tasks</div>
+            <div class="dsi">📝&nbsp; Personal Tasks</div>
+            <div class="dsi">🎥&nbsp; Meetings</div>
+            <div class="dsi">👥&nbsp; Team</div>
+            <div class="dsi">⚙️&nbsp; Settings</div>
+          </div>
+          <div class="dm">
+            <div class="dtb">
+              <div class="dg">Good morning, Admin 👋</div>
+              <div class="dadd">＋ New Task</div>
+            </div>
+            <div class="ds">
+              <div class="sc"><div class="sl">Total Tasks</div><div class="sv b">18</div><div class="pb"><div class="pf" style="width:72%"></div></div></div>
+              <div class="sc"><div class="sl">Completed</div><div class="sv g2">13</div><div class="pb"><div class="pf" style="width:72%;background:linear-gradient(90deg,#10b981,#059669)"></div></div></div>
+              <div class="sc"><div class="sl">Overdue</div><div class="sv r2">2</div><div class="pb"><div class="pf" style="width:11%;background:linear-gradient(90deg,#ef4444,#dc2626)"></div></div></div>
+            </div>
+            <div class="tl">
+              <div class="ti"><div class="tc done">✓</div><div class="tn done">Complete Q1 report</div><div class="ttag tv">Done</div></div>
+              <div class="ti"><div class="tc pend"></div><div class="tn">Review team proposals</div><div class="ttag td">In Progress</div></div>
+              <div class="ti"><div class="tc urg"></div><div class="tn">Client presentation prep</div><div class="ttag tu">Urgent</div></div>
+              <div class="ti"><div class="tc pend"></div><div class="tn">Team weekly standup</div><div class="ttag tv">Meeting</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-strip reveal">
+  <div class="sb"><div class="sn">15</div><div class="sd">Days free trial</div></div>
+  <div class="sb"><div class="sn">3</div><div class="sd">Flexible plans</div></div>
+  <div class="sb"><div class="sn">99.9%</div><div class="sd">Uptime guaranteed</div></div>
+  <div class="sb"><div class="sn">₹799</div><div class="sd">Starting per month</div></div>
+</div>
+
+<!-- FEATURES -->
+<section class="features reveal" id="features">
+  <div class="section-label">Features</div>
+  <h2 class="section-title">Everything your team<br><span class="gt">needs to deliver</span></h2>
+  <p class="section-sub">Simple but powerful tools that help your team stay focused and get work done faster.</p>
+  <div class="fg">
+    <div class="fc"><div class="fi">✅</div><div class="ft">Task Management</div><div class="fd">Create, assign, and track tasks across your team. Set priorities, due dates, and never miss a deadline again.</div></div>
+    <div class="fc"><div class="fi">🎥</div><div class="ft">Google Meet Integration</div><div class="fd">Schedule meetings directly in TaskHive with Google Meet links. Add participants from your team in one click.</div></div>
+    <div class="fc"><div class="fi">🔔</div><div class="ft">Real-time Notifications</div><div class="fd">Get instant alerts when tasks are assigned to you or you're added to a meeting. Never miss important updates.</div></div>
+    <div class="fc"><div class="fi">📊</div><div class="ft">Analytics Dashboard</div><div class="fd">Track team performance, completion rates, and productivity with beautiful charts. Available on Pro and Enterprise plans.</div></div>
+    <div class="fc"><div class="fi">👥</div><div class="ft">Team Management</div><div class="fd">Invite team members, manage roles, and control access. Admins have full control over their workspace.</div></div>
+    <div class="fc"><div class="fi">🌙</div><div class="ft">Dark Mode</div><div class="fd">Works beautifully in both light and dark mode. Easy on the eyes during those late night work sessions.</div></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how reveal" id="how">
+  <div class="how-inner">
+    <div style="text-align:center">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Up and running<br><span class="gt">in minutes</span></h2>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="snum">1</div><div class="stit">Create Account</div><div class="sdesc">Sign up as admin, create your company workspace. 15-day free trial starts immediately — no card needed.</div></div>
+      <div class="step"><div class="snum">2</div><div class="stit">Invite Your Team</div><div class="sdesc">Invite team members via email. They get a link to set their password and join your workspace instantly.</div></div>
+      <div class="step"><div class="snum">3</div><div class="stit">Assign Tasks</div><div class="sdesc">Create tasks, set priorities and due dates, assign to team members. Everyone gets notified in real time.</div></div>
+      <div class="step"><div class="snum">4</div><div class="stit">Track & Deliver</div><div class="sdesc">Monitor progress on your dashboard, hold meetings, and celebrate as your team delivers results on time.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing reveal" id="pricing">
+  <div class="pricing-inner">
+    <div class="section-label">Pricing</div>
+    <h2 class="section-title">Simple, <span class="gt">transparent</span> pricing</h2>
+    <p style="color:var(--muted);font-size:15px;margin-top:10px">All plans include a 15-day free trial. No credit card required to start.</p>
+    <div class="pg">
+      <div class="pc">
+        <div class="pname">Starter</div>
+        <div class="pprice">₹799<span>/mo</span></div>
+        <div class="pdesc">Perfect for small teams</div>
+        <div class="ptrial">✓ 15-day free trial</div>
+        <ul class="pf2">
+          <li>1 admin + 4 users (5 total)</li>
+          <li>Task management</li>
+          <li>Meetings with Google Meet</li>
+          <li>Real-time notifications</li>
+          <li>1GB storage</li>
+          <li>₹149/extra user/month</li>
+        </ul>
+        <a href="https://realtask-hive.vercel.app/signup" class="bplan bplan-ol">Start Free Trial</a>
+      </div>
+      <div class="pc feat">
+        <div class="fbadge">Most Popular</div>
+        <div class="pname">Pro</div>
+        <div class="pprice">₹1,599<span>/mo</span></div>
+        <div class="pdesc">Best for growing teams</div>
+        <div class="ptrial">✓ 15-day free trial</div>
+        <ul class="pf2">
+          <li>1 admin + 9 users (10 total)</li>
+          <li>Everything in Starter</li>
+          <li>Advanced analytics</li>
+          <li>Priority support</li>
+          <li>5GB storage</li>
+          <li>₹99/extra user/month</li>
+        </ul>
+        <a href="https://realtask-hive.vercel.app/signup" class="bplan bplan-f">Start Free Trial</a>
+      </div>
+      <div class="pc">
+        <div class="pname">Enterprise</div>
+        <div class="pprice">₹2,799<span>/mo</span></div>
+        <div class="pdesc">For large organizations</div>
+        <div class="ptrial">✓ 15-day free trial</div>
+        <ul class="pf2">
+          <li>1 admin + 19 users (20 total)</li>
+          <li>Everything in Pro</li>
+          <li>Dedicated support</li>
+          <li>Custom integrations</li>
+          <li>10GB storage</li>
+          <li>₹79/extra user/month</li>
+        </ul>
+        <a href="https://realtask-hive.vercel.app/signup" class="bplan bplan-ol">Start Free Trial</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section reveal">
+  <div class="cta-box">
+    <h2>Ready to <span class="gt">get things done?</span></h2>
+    <p>Join TaskHive and give your team the tools they need to deliver. Start your 15-day free trial today.</p>
+    <div class="cta-btns">
+      <a href="https://realtask-hive.vercel.app/signup" class="btn-hero">Start Free Trial →</a>
+      <a href="https://realtask-hive.vercel.app/login" class="btn-ol">Sign In</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fl"><div class="logo-icon" style="width:28px;height:28px;font-size:14px">🐝</div>TaskHive</div>
+  <ul class="flinks">
+    <li><a href="https://realtask-hive.vercel.app/pricing">Pricing</a></li>
+    <li><a href="https://realtask-hive.vercel.app/login">Login</a></li>
+    <li><a href="https://realtask-hive.vercel.app/signup">Sign Up</a></li>
+  </ul>
+  <div class="fc2">© 2026 TaskHive. All rights reserved.</div>
+</footer>
+
+<script>
+function toggleMenu(){document.getElementById('mobMenu').classList.toggle('open');}
+
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(r=>obs.observe(r));
+
+// CANVAS BACKGROUND
+const canvas=document.getElementById('bgCanvas');
+const ctx=canvas.getContext('2d');
+let W,H,particles=[],mouse={x:-999,y:-999};
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();
+window.addEventListener('resize',()=>{resize();initP();});
+document.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
+
+const orbs=[
+  {x:0,y:0,r:280,cx:0.15,cy:0.3,color:'245,158,11',vx:0.25,vy:0.18},
+  {x:0,y:0,r:220,cx:0.88,cy:0.65,color:'16,185,129',vx:-0.18,vy:0.22},
+  {x:0,y:0,r:160,cx:0.5,cy:0.05,color:'249,115,22',vx:0.12,vy:-0.15},
+];
+function initOrbs(){orbs.forEach(o=>{o.x=o.cx*W;o.y=o.cy*H;});}
+initOrbs();
+
+function initP(){
+  particles=[];
+  const n=Math.min(Math.floor(W*H/11000),110);
+  for(let i=0;i<n;i++){
+    const c=Math.random();
+    particles.push({x:Math.random()*W,y:Math.random()*H,z:Math.random()*1.8+0.4,vx:(Math.random()-.5)*0.25,vy:(Math.random()-.5)*0.25,r:Math.random()*1.4+0.4,op:Math.random()*0.55+0.1,color:c>0.65?'245,158,11':c>0.4?'16,185,129':'100,100,100'});
+  }
+}
+initP();
+
+let gOff=0;
+function drawGrid(){
+  const vx=W/2,vy=H*0.38;
+  ctx.lineWidth=0.7;
+  for(let i=0;i<14;i++){
+    const y=vy+(i*78+gOff%78);if(y>H+10)continue;
+    const t=(y-vy)/(H*1.1-vy);
+    const xl=vx-t*W*0.75,xr=vx+t*W*0.75;
+    ctx.strokeStyle=`rgba(245,158,11,${0.02*(1-i/14)})`;
+    ctx.beginPath();ctx.moveTo(xl,y);ctx.lineTo(xr,y);ctx.stroke();
+  }
+  for(let c=-7;c<=7;c++){
+    const xe=W/2+c*(W/14);
+    ctx.strokeStyle='rgba(245,158,11,0.015)';
+    ctx.beginPath();ctx.moveTo(vx,vy);ctx.lineTo(xe,H+20);ctx.stroke();
+  }
+}
+
+function drawOrbs(){
+  orbs.forEach(o=>{
+    const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
+    g.addColorStop(0,`rgba(${o.color},0.08)`);g.addColorStop(0.5,`rgba(${o.color},0.03)`);g.addColorStop(1,`rgba(${o.color},0)`);
+    ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    o.x+=o.vx;o.y+=o.vy;
+    if(o.x<-o.r||o.x>W+o.r)o.vx*=-1;if(o.y<-o.r||o.y>H+o.r)o.vy*=-1;
+  });
+}
+
+function drawParticles(){
+  for(let i=0;i<particles.length;i++){
+    const p=particles[i];
+    p.x+=p.vx*p.z;p.y+=p.vy*p.z;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    const dx=p.x-mouse.x,dy=p.y-mouse.y,d=Math.sqrt(dx*dx+dy*dy);
+    if(d<100&&d>0){const f=(100-d)/100*2;p.x+=dx/d*f;p.y+=dy/d*f;}
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.z,0,Math.PI*2);
+    const a=Math.floor(p.op*200).toString(16).padStart(2,'0');
+    ctx.fillStyle=p.color==='100,100,100'?`rgba(80,80,80,${p.op*0.4})`:`#${p.color.split(',').map(v=>parseInt(v).toString(16).padStart(2,'0')).join('')}${a}`;
+    ctx.fill();
+    for(let j=i+1;j<particles.length;j++){
+      const q=particles[j];const dx2=p.x-q.x,dy2=p.y-q.y,d2=Math.sqrt(dx2*dx2+dy2*dy2);
+      if(d2<90){ctx.strokeStyle=`rgba(245,158,11,${(1-d2/90)*0.1})`;ctx.lineWidth=0.4;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();}
+    }
+  }
+}
+
+function animate(){
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#080808';ctx.fillRect(0,0,W,H);
+  const tg=ctx.createLinearGradient(0,0,0,H*0.45);
+  tg.addColorStop(0,'rgba(15,12,8,0.45)');tg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=tg;ctx.fillRect(0,0,W,H);
+  drawOrbs();drawGrid();drawParticles();
+  gOff+=0.5;requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
